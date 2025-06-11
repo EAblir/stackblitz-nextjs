@@ -1,0 +1,121 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\sidebar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:components\\layout\\sidebar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\app\\administration\\administrations\\page.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\administration\\administrations\\page.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\.next\\static\\css\\app\\layout.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.next\\static\\css\\app\\layout.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\dashboard-layout.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:components\\layout\\dashboard-layout.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\topbar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:components\\layout\\topbar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:components.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "page.tsx",
+              "DocumentMoniker": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\app\\administration\\administrations\\page.tsx",
+              "RelativeDocumentMoniker": "app\\administration\\administrations\\page.tsx",
+              "ToolTip": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\app\\administration\\administrations\\page.tsx",
+              "RelativeToolTip": "app\\administration\\administrations\\page.tsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-06-10T09:52:55.79Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "layout.css",
+              "DocumentMoniker": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\.next\\static\\css\\app\\layout.css",
+              "RelativeDocumentMoniker": ".next\\static\\css\\app\\layout.css",
+              "ToolTip": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\.next\\static\\css\\app\\layout.css",
+              "RelativeToolTip": ".next\\static\\css\\app\\layout.css",
+              "ViewState": "AgIAALwHAAAAAAAAAIAwwNQHAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-06-10T09:40:27.568Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "dashboard-layout.tsx",
+              "DocumentMoniker": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\dashboard-layout.tsx",
+              "RelativeDocumentMoniker": "components\\layout\\dashboard-layout.tsx",
+              "ToolTip": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\dashboard-layout.tsx",
+              "RelativeToolTip": "components\\layout\\dashboard-layout.tsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-06-10T09:33:33.811Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "topbar.tsx",
+              "DocumentMoniker": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\topbar.tsx",
+              "RelativeDocumentMoniker": "components\\layout\\topbar.tsx",
+              "ToolTip": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\topbar.tsx",
+              "RelativeToolTip": "components\\layout\\topbar.tsx",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAADoAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-06-10T09:29:57.253Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "sidebar.tsx",
+              "DocumentMoniker": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\sidebar.tsx",
+              "RelativeDocumentMoniker": "components\\layout\\sidebar.tsx",
+              "ToolTip": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components\\layout\\sidebar.tsx",
+              "RelativeToolTip": "components\\layout\\sidebar.tsx",
+              "ViewState": "AgIAAEQAAAAAAAAAAAAAAD8AAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-06-10T09:26:40.308Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "components.json",
+              "DocumentMoniker": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components.json",
+              "RelativeDocumentMoniker": "components.json",
+              "ToolTip": "C:\\Users\\globi\\Desktop\\AI Driven apps\\NextJS Project\\project\\components.json",
+              "RelativeToolTip": "components.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-06-10T09:24:41.231Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
