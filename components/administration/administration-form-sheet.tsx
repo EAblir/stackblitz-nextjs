@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,23 +9,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
-interface CreateAdministrationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface Administration {
+  id?: number;
+  accountingOffice: string;
+  administrationName: string;
+  schedule: string;
+  days: string[];
+  status: 'open' | 'ongoing' | 'done';
+  lastModified?: string;
 }
 
-export function CreateAdministrationModal({ isOpen, onClose }: CreateAdministrationModalProps) {
-  const [formData, setFormData] = useState({
+interface AdministrationFormSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  administration?: Administration | null;
+  onSave: (administration: Administration) => void;
+}
+
+export function AdministrationFormSheet({ isOpen, onClose, administration, onSave }: AdministrationFormSheetProps) {
+  const [formData, setFormData] = useState<Administration>({
     accountingOffice: '',
     administrationName: '',
     schedule: '',
-    days: []
+    days: [],
+    status: 'open'
   });
 
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
+  const isEditing = !!administration;
+
   const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const monthDays = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+
+  useEffect(() => {
+    if (administration) {
+      setFormData(administration);
+      setSelectedDays(administration.days || []);
+    } else {
+      setFormData({
+        accountingOffice: '',
+        administrationName: '',
+        schedule: '',
+        days: [],
+        status: 'open'
+      });
+      setSelectedDays([]);
+    }
+  }, [administration]);
 
   const handleDayToggle = (day: string) => {
     setSelectedDays(prev => 
@@ -48,32 +79,26 @@ export function CreateAdministrationModal({ isOpen, onClose }: CreateAdministrat
       return;
     }
 
-    const submissionData = {
+    const administrationData = {
       ...formData,
-      days: selectedDays
+      days: selectedDays,
+      id: administration?.id || Date.now(),
+      lastModified: new Date().toISOString().split('T')[0]
     };
 
-    console.log('Creating administration:', submissionData);
-    toast.success('Administration created successfully');
+    onSave(administrationData);
+    toast.success(isEditing ? 'Administration updated successfully' : 'Administration created successfully');
     onClose();
-    
-    setFormData({
-      accountingOffice: '',
-      administrationName: '',
-      schedule: '',
-      days: []
-    });
-    setSelectedDays([]);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Create New Administration</DialogTitle>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[400px] sm:w-[540px]">
+        <SheetHeader>
+          <SheetTitle>{isEditing ? 'Edit Administration' : 'Create New Administration'}</SheetTitle>
+        </SheetHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="accountingOffice">Accounting Office *</Label>
@@ -96,21 +121,37 @@ export function CreateAdministrationModal({ isOpen, onClose }: CreateAdministrat
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="schedule">Schedule *</Label>
-            <Select value={formData.schedule} onValueChange={(value) => {
-              setFormData({...formData, schedule: value});
-              setSelectedDays([]); // Reset selected days when schedule changes
-            }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select schedule" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="schedule">Schedule *</Label>
+              <Select value={formData.schedule} onValueChange={(value) => {
+                setFormData({...formData, schedule: value});
+                setSelectedDays([]); // Reset selected days when schedule changes
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select schedule" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="status">Status *</Label>
+              <Select value={formData.status} onValueChange={(value: 'open' | 'ongoing' | 'done') => setFormData({...formData, status: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="ongoing">Ongoing</SelectItem>
+                  <SelectItem value="done">Done</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {formData.schedule && (
@@ -144,11 +185,11 @@ export function CreateAdministrationModal({ isOpen, onClose }: CreateAdministrat
               Cancel
             </Button>
             <Button type="submit">
-              Create Administration
+              {isEditing ? 'Update Administration' : 'Create Administration'}
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
