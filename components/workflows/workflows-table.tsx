@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Edit, MoreHorizontal } from 'lucide-react';
@@ -9,60 +10,34 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
+
+interface Company {
+  id: number;
+  name: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+}
 
 interface Workflow {
   id: number;
   name: string;
   description: string;
   trigger: string;
+  schedule?: string;
   status: 'active' | 'paused' | 'draft';
-  lastRun: string;
+  lastRun?: string;
   executions: number;
   created: string;
+  company?: Company;
+  user?: User;
+  _count?: {
+    steps: number;
+  };
 }
-
-const workflows: Workflow[] = [
-  {
-    id: 1,
-    name: 'Invoice Auto-Processing',
-    description: 'Automatically process incoming invoices and extract data',
-    trigger: 'Email Receipt',
-    status: 'active',
-    lastRun: '2024-01-15 14:30',
-    executions: 342,
-    created: '2024-01-01'
-  },
-  {
-    id: 2,
-    name: 'Bank Reconciliation',
-    description: 'Match bank transactions with accounting entries',
-    trigger: 'Daily Schedule',
-    status: 'active',
-    lastRun: '2024-01-15 09:00',
-    executions: 28,
-    created: '2024-01-05'
-  },
-  {
-    id: 3,
-    name: 'Expense Report Approval',
-    description: 'Route expense reports for manager approval',
-    trigger: 'Form Submission',
-    status: 'paused',
-    lastRun: '2024-01-10 16:45',
-    executions: 156,
-    created: '2024-01-03'
-  },
-  {
-    id: 4,
-    name: 'VAT Calculation',
-    description: 'Calculate VAT for EU transactions',
-    trigger: 'Manual',
-    status: 'draft',
-    lastRun: 'Never',
-    executions: 0,
-    created: '2024-01-14'
-  }
-];
 
 interface WorkflowsTableProps {
   searchQuery: string;
@@ -70,6 +45,31 @@ interface WorkflowsTableProps {
 }
 
 export function WorkflowsTable({ searchQuery, statusFilter }: WorkflowsTableProps) {
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchWorkflows();
+  }, []);
+
+  const fetchWorkflows = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/workflows');
+      if (response.ok) {
+        const data = await response.json();
+        setWorkflows(data);
+      } else {
+        toast.error('Failed to load workflows');
+      }
+    } catch (error) {
+      console.error('Error fetching workflows:', error);
+      toast.error('Failed to load workflows');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredWorkflows = workflows.filter(workflow => {
     const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          workflow.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -103,16 +103,36 @@ export function WorkflowsTable({ searchQuery, statusFilter }: WorkflowsTableProp
     }
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Never';
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading workflows...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead className="bg-gray-50">
           <tr>
             <th className="text-left p-4 font-medium text-gray-700">Workflow</th>
+            <th className="text-left p-4 font-medium text-gray-700">Company</th>
             <th className="text-left p-4 font-medium text-gray-700">Trigger</th>
             <th className="text-left p-4 font-medium text-gray-700">Status</th>
             <th className="text-left p-4 font-medium text-gray-700">Last Run</th>
             <th className="text-left p-4 font-medium text-gray-700">Executions</th>
+            <th className="text-left p-4 font-medium text-gray-700">Steps</th>
+            <th className="text-left p-4 font-medium text-gray-700">Created By</th>
             <th className="text-left p-4 font-medium text-gray-700">Created</th>
             <th className="text-left p-4 font-medium text-gray-700">Actions</th>
           </tr>
@@ -127,8 +147,14 @@ export function WorkflowsTable({ searchQuery, statusFilter }: WorkflowsTableProp
                 </div>
               </td>
               <td className="p-4">
+                <span className="text-sm text-gray-900">
+                  {workflow.company?.name || 'No Company'}
+                </span>
+              </td>
+              <td className="p-4">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   {workflow.trigger}
+                  {workflow.schedule && ` (${workflow.schedule})`}
                 </span>
               </td>
               <td className="p-4">
@@ -137,9 +163,11 @@ export function WorkflowsTable({ searchQuery, statusFilter }: WorkflowsTableProp
                   <span className="capitalize">{workflow.status}</span>
                 </Badge>
               </td>
-              <td className="p-4 text-sm text-gray-600">{workflow.lastRun}</td>
+              <td className="p-4 text-sm text-gray-600">{formatDate(workflow.lastRun)}</td>
               <td className="p-4 font-medium">{workflow.executions.toLocaleString()}</td>
-              <td className="p-4 text-sm text-gray-600">{workflow.created}</td>
+              <td className="p-4 text-sm text-gray-600">{workflow._count?.steps || 0}</td>
+              <td className="p-4 text-sm text-gray-600">{workflow.user?.name || 'Unknown'}</td>
+              <td className="p-4 text-sm text-gray-600">{formatDate(workflow.created)}</td>
               <td className="p-4">
                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" size="sm">

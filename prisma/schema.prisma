@@ -24,6 +24,24 @@ model User {
   lastLogin DateTime
 
   messages  Message[]
+  workflows Workflow[]
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String
+  industry    String
+  size        String   // small, medium, large, enterprise
+  country     String
+  website     String?
+  description String?
+  logo        String?
+  status      String   @default("active") // active, inactive
+  created     DateTime @default(now())
+  updated     DateTime @updatedAt
+
+  administrations Administration[]
+  workflows       Workflow[]
 }
 
 model Administration {
@@ -35,6 +53,8 @@ model Administration {
   status              String
   created             DateTime      @default(now())
   lastModified        DateTime      @default(now())
+  companyId           Int?
+  company             Company?      @relation(fields: [companyId], references: [id])
 
   instructions        Instruction[]
   messages            Message[]
@@ -62,4 +82,35 @@ model Message {
   created             DateTime        @default(now())
   userId              Int
   user                User  @relation(fields: [userId], references: [id])
+}
+
+model Workflow {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  trigger     String   // email, schedule, form, manual, webhook
+  schedule    String?  // daily, weekly, monthly (for scheduled workflows)
+  status      String   @default("draft") // active, paused, draft
+  lastRun     DateTime?
+  executions  Int      @default(0)
+  created     DateTime @default(now())
+  updated     DateTime @updatedAt
+  companyId   Int?
+  company     Company? @relation(fields: [companyId], references: [id])
+  userId      Int      // Creator/owner of the workflow
+  user        User     @relation(fields: [userId], references: [id])
+
+  steps       WorkflowStep[]
+}
+
+model WorkflowStep {
+  id          Int      @id @default(autoincrement())
+  workflowId  Int
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  stepOrder   Int      // Order of execution
+  stepType    String   // action, condition, integration
+  name        String
+  description String?
+  config      Json     // Configuration data for the step
+  created     DateTime @default(now())
 }

@@ -8,12 +8,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Download, Search, Play, Pause } from 'lucide-react';
+import { toast } from 'sonner';
+import { downloadExcel, downloadPDF } from '@/lib/export-utils';
 
 export default function WorkflowsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async (format: 'excel' | 'pdf') => {
+    try {
+      setExporting(true);
+      if (format === 'excel') {
+        await downloadExcel('workflows');
+        toast.success('Excel file downloaded successfully');
+      } else {
+        await downloadPDF('workflows');
+        toast.success('PDF export opened in new window');
+      }
+    } catch (error) {
+      toast.error(`Failed to export ${format.toUpperCase()}`);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
@@ -28,10 +48,24 @@ export default function WorkflowsPage() {
               <Plus className="w-4 h-4 mr-2" />
               Create Workflow
             </Button>
-            <Button variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => handleExport('excel')}
+                disabled={exporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {exporting ? 'Exporting...' : 'Excel'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => handleExport('pdf')}
+                disabled={exporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                PDF
+              </Button>
+            </div>
           </div>
         </div>
 

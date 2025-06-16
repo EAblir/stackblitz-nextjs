@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
-
-
+import { downloadExcel, downloadPDF } from '@/lib/export-utils';
 
 export default function InstructionsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -17,12 +16,13 @@ export default function InstructionsPage() {
   const [showFormSheet, setShowFormSheet] = useState(false);
   const [editingInstruction, setEditingInstruction] = useState<Instruction | null>(null);
   const [instructions, setInstructions] = useState<Instruction[]>([]);
+  const [exporting, setExporting] = useState(false);
  
   useEffect(() => {
     fetch('/api/instructions')
       .then(res => res.json())
       .then(setInstructions)
-      .catch(() => toast.error('Failed to load users'));
+      .catch(() => toast.error('Failed to load instructions'));
   }, []);
 
   const handleSaveInstruction = async (instructionData: Instruction) => {
@@ -90,6 +90,23 @@ export default function InstructionsPage() {
     setShowFormSheet(true);
   };
 
+  const handleExport = async (format: 'excel' | 'pdf') => {
+    try {
+      setExporting(true);
+      if (format === 'excel') {
+        await downloadExcel('instructions');
+        toast.success('Excel file downloaded successfully');
+      } else {
+        await downloadPDF('instructions');
+        toast.success('PDF export opened in new window');
+      }
+    } catch (error) {
+      toast.error(`Failed to export ${format.toUpperCase()}`);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
       <div className="p-6">
@@ -100,10 +117,24 @@ export default function InstructionsPage() {
               <Plus className="w-4 h-4 mr-2" />
               Create Instruction
             </Button>
-            <Button variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => handleExport('excel')}
+                disabled={exporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {exporting ? 'Exporting...' : 'Excel'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => handleExport('pdf')}
+                disabled={exporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                PDF
+              </Button>
+            </div>
           </div>
         </div>
 

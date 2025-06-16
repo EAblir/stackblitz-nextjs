@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { downloadExcel, downloadPDF } from '@/lib/export-utils';
 
 export default function MessagesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -19,6 +20,7 @@ export default function MessagesPage() {
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   // Fetch messages from API
   useEffect(() => {
@@ -119,6 +121,23 @@ export default function MessagesPage() {
     setShowFormSheet(true);
   };
 
+  const handleExport = async (format: 'excel' | 'pdf') => {
+    try {
+      setExporting(true);
+      if (format === 'excel') {
+        await downloadExcel('messages');
+        toast.success('Excel file downloaded successfully');
+      } else {
+        await downloadPDF('messages');
+        toast.success('PDF export opened in new window');
+      }
+    } catch (error) {
+      toast.error(`Failed to export ${format.toUpperCase()}`);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
@@ -144,10 +163,24 @@ export default function MessagesPage() {
               <Plus className="w-4 h-4 mr-2" />
               Create Message
             </Button>
-            <Button variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => handleExport('excel')}
+                disabled={exporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {exporting ? 'Exporting...' : 'Excel'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => handleExport('pdf')}
+                disabled={exporting}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                PDF
+              </Button>
+            </div>
           </div>
         </div>
 
