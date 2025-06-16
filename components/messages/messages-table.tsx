@@ -22,16 +22,29 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-export interface Message {
+interface Administration {
   id: number;
+  administrationName: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+}
+
+export interface Message {
+  id?: number;
   type: 'question' | 'feedback';
   status: 'open' | 'answered' | 'resolved';
-  administrationName: string;
-  invoiceNumber: string;
-  fields: string;
+  administration?: Administration;
+  administrationId?: number;
+  invoiceNumber?: string;
+  fields?: string;
   message: string;
-  assignee: string;
-  created: string;
+  assignee?: string;
+  created?: string;
+  user?: User;
+  userId?: number;
 }
 
 interface MessagesTableProps {
@@ -56,8 +69,8 @@ export function MessagesTable({
 
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         message.administrationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         message.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase());
+                         (message.administration?.administrationName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (message.invoiceNumber || '').toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesType = typeFilter === 'all' || message.type === typeFilter;
     const matchesStatus = statusFilter === 'all' || message.status === statusFilter;
@@ -99,9 +112,11 @@ export function MessagesTable({
     }
   };
 
-  const handleDeleteClick = (id: number) => {
-    setMessageToDelete(id);
-    setDeleteDialogOpen(true);
+  const handleDeleteClick = (id?: number) => {
+    if (id) {
+      setMessageToDelete(id);
+      setDeleteDialogOpen(true);
+    }
   };
 
   const handleDeleteConfirm = () => {
@@ -110,6 +125,12 @@ export function MessagesTable({
       setDeleteDialogOpen(false);
       setMessageToDelete(null);
     }
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
   };
 
   return (
@@ -144,23 +165,29 @@ export function MessagesTable({
                     <span className="capitalize">{message.status}</span>
                   </Badge>
                 </td>
-                <td className="p-4 font-medium">{message.administrationName}</td>
-                <td className="p-4 font-mono text-sm">{message.invoiceNumber}</td>
-                <td className="p-4 text-sm text-gray-600">{message.fields}</td>
+                <td className="p-4 font-medium">
+                  {message.administration?.administrationName || 'N/A'}
+                </td>
+                <td className="p-4 font-mono text-sm">{message.invoiceNumber || 'N/A'}</td>
+                <td className="p-4 text-sm text-gray-600">{message.fields || 'N/A'}</td>
                 <td className="p-4 max-w-xs truncate" title={message.message}>
                   {message.message}
                 </td>
                 <td className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="w-6 h-6">
-                      <AvatarFallback className="text-xs">
-                        {message.assignee.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{message.assignee}</span>
-                  </div>
+                  {message.assignee ? (
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-xs">
+                          {message.assignee.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm">{message.assignee}</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-400">Unassigned</span>
+                  )}
                 </td>
-                <td className="p-4 text-sm text-gray-600">{message.created}</td>
+                <td className="p-4 text-sm text-gray-600">{formatDate(message.created)}</td>
                 <td className="p-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { MessagesTable, Message } from '@/components/messages/messages-table';
 import { MessageFormSheet } from '@/components/messages/message-form-sheet';
@@ -10,42 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-const initialMessages: Message[] = [
-  {
-    id: 1,
-    type: 'question',
-    status: 'open',
-    administrationName: 'Acme Corp',
-    invoiceNumber: 'INV-2024-001',
-    fields: 'Invoice number, G/L code',
-    message: 'Need clarification on the VAT calculation for this invoice.',
-    assignee: 'John Doe',
-    created: '2024-01-15'
-  },
-  {
-    id: 2,
-    type: 'feedback',
-    status: 'resolved',
-    administrationName: 'TechStart Inc',
-    invoiceNumber: 'INV-2024-002',
-    fields: 'VAT code',
-    message: 'The VAT rate seems incorrect for EU transactions.',
-    assignee: 'Sarah Johnson',
-    created: '2024-01-14'
-  },
-  {
-    id: 3,
-    type: 'question',
-    status: 'answered',
-    administrationName: 'Global Solutions',
-    invoiceNumber: 'INV-2024-003',
-    fields: 'G/L code',
-    message: 'Which account should be used for office supplies?',
-    assignee: 'Mike Chen',
-    created: '2024-01-13'
-  }
-];
-
 export default function MessagesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,20 +17,76 @@ export default function MessagesPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showFormSheet, setShowFormSheet] = useState(false);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSaveMessage = (messageData: Message) => {
-    if (editingMessage) {
-      // Update existing message
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageData.id ? messageData : msg
-      ));
-    } else {
-      // Add new message
-      setMessages(prev => [...prev, messageData]);
+  // Fetch messages from API
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const fetchMessages = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/messages');
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data);
+      } else {
+        toast.error('Failed to load messages');
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      toast.error('Failed to load messages');
+    } finally {
+      setLoading(false);
     }
-    setShowFormSheet(false);
-    setEditingMessage(null);
+  };
+
+  const handleSaveMessage = async (messageData: Message) => {
+    try {
+      if (editingMessage) {
+        // Update existing message
+        const response = await fetch('/api/messages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(messageData),
+        });
+
+        if (response.ok) {
+          const updatedMessage = await response.json();
+          setMessages(prev => prev.map(msg => 
+            msg.id === updatedMessage.id ? updatedMessage : msg
+          ));
+          toast.success('Message updated successfully');
+        } else {
+          toast.error('Failed to update message');
+          return;
+        }
+      } else {
+        // Add new message
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(messageData),
+        });
+
+        if (response.ok) {
+          const newMessage = await response.json();
+          setMessages(prev => [newMessage, ...prev]);
+          toast.success('Message created successfully');
+        } else {
+          toast.error('Failed to create message');
+          return;
+        }
+      }
+
+      setShowFormSheet(false);
+      setEditingMessage(null);
+    } catch (error) {
+      console.error('Error saving message:', error);
+      toast.error('Failed to save message');
+    }
   };
 
   const handleEditMessage = (message: Message) => {
@@ -74,15 +94,45 @@ export default function MessagesPage() {
     setShowFormSheet(true);
   };
 
-  const handleDeleteMessage = (id: number) => {
-    setMessages(prev => prev.filter(msg => msg.id !== id));
-    toast.success('Message deleted successfully');
+  const handleDeleteMessage = async (id: number) => {
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        setMessages(prev => prev.filter(msg => msg.id !== id));
+        toast.success('Message deleted successfully');
+      } else {
+        toast.error('Failed to delete message');
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast.error('Failed to delete message');
+    }
   };
 
   const handleCreateNew = () => {
     setEditingMessage(null);
     setShowFormSheet(true);
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading messages...</p>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>

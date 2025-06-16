@@ -9,16 +9,29 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
+interface Administration {
+  id: number;
+  administrationName: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+}
+
 interface Message {
   id?: number;
   type: 'question' | 'feedback';
   status: 'open' | 'answered' | 'resolved';
-  administrationName: string;
-  invoiceNumber: string;
-  fields: string;
+  administration?: Administration;
+  administrationId?: number;
+  invoiceNumber?: string;
+  fields?: string;
   message: string;
-  assignee: string;
+  assignee?: string;
   created?: string;
+  user?: User;
+  userId?: number;
 }
 
 interface MessageFormSheetProps {
@@ -29,29 +42,47 @@ interface MessageFormSheetProps {
 }
 
 export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFormSheetProps) {
+  const [administrations, setAdministrations] = useState<Administration[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState<Message>({
     type: 'question',
     status: 'open',
-    administrationName: '',
+    message: '',
     invoiceNumber: '',
     fields: '',
-    message: '',
     assignee: ''
   });
 
   const isEditing = !!message;
 
+  // Fetch administrations and users
+  useEffect(() => {
+    if (isOpen) {
+      Promise.all([
+        fetch('/api/administrations').then(res => res.json()),
+        fetch('/api/users').then(res => res.json())
+      ]).then(([adminData, userData]) => {
+        setAdministrations(adminData);
+        setUsers(userData);
+      }).catch(() => {
+        toast.error('Failed to load form data');
+      });
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (message) {
-      setFormData(message);
+      setFormData({
+        ...message,
+        administrationId: message.administration?.id
+      });
     } else {
       setFormData({
         type: 'question',
         status: 'open',
-        administrationName: '',
+        message: '',
         invoiceNumber: '',
         fields: '',
-        message: '',
         assignee: ''
       });
     }
@@ -60,20 +91,21 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.administrationName || !formData.message) {
-      toast.error('Please fill in all required fields');
+    if (!formData.message.trim()) {
+      toast.error('Please enter a message');
       return;
     }
 
     const messageData = {
       ...formData,
-      id: message?.id || Date.now(),
-      created: message?.created || new Date().toISOString().split('T')[0]
+      id: message?.id || undefined,
+      created: message?.created || new Date().toISOString(),
+      administration: formData.administrationId 
+        ? administrations.find(admin => admin.id === formData.administrationId)
+        : undefined
     };
 
     onSave(messageData);
-    toast.success(isEditing ? 'Message updated successfully' : 'Message created successfully');
-    onClose();
   };
 
   return (
@@ -114,13 +146,23 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
           </div>
 
           <div>
-            <Label htmlFor="administrationName">Administration Name *</Label>
-            <Input
-              id="administrationName"
-              value={formData.administrationName}
-              onChange={(e) => setFormData({...formData, administrationName: e.target.value})}
-              placeholder="Enter administration name"
-            />
+            <Label htmlFor="administrationId">Administration</Label>
+            <Select 
+              value={formData.administrationId ? String(formData.administrationId) : ''} 
+              onValueChange={(value) => setFormData({...formData, administrationId: value ? parseInt(value) : undefined})}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select administration (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No administration</SelectItem>
+                {administrations.map((admin) => (
+                  <SelectItem key={admin.id} value={String(admin.id)}>
+                    {admin.administrationName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -128,7 +170,7 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
               <Label htmlFor="invoiceNumber">Invoice Number</Label>
               <Input
                 id="invoiceNumber"
-                value={formData.invoiceNumber}
+                value={formData.invoiceNumber || ''}
                 onChange={(e) => setFormData({...formData, invoiceNumber: e.target.value})}
                 placeholder="INV-2024-001"
               />
@@ -138,7 +180,7 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
               <Label htmlFor="fields">Fields</Label>
               <Input
                 id="fields"
-                value={formData.fields}
+                value={formData.fields || ''}
                 onChange={(e) => setFormData({...formData, fields: e.target.value})}
                 placeholder="Invoice number, G/L code, VAT"
               />
@@ -147,14 +189,17 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
 
           <div>
             <Label htmlFor="assignee">Assignee</Label>
-            <Select value={formData.assignee} onValueChange={(value) => setFormData({...formData, assignee: value})}>
+            <Select value={formData.assignee || ''} onValueChange={(value) => setFormData({...formData, assignee: value})}>
               <SelectTrigger>
-                <SelectValue placeholder="Select assignee" />
+                <SelectValue placeholder="Select assignee (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="john-doe">John Doe</SelectItem>
-                <SelectItem value="sarah-johnson">Sarah Johnson</SelectItem>
-                <SelectItem value="mike-chen">Mike Chen</SelectItem>
+                <SelectItem value="">No assignee</SelectItem>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.name}>
+                    {user.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
