@@ -12,8 +12,8 @@ interface User {
   id?: number;
   name: string;
   email: string;
-  role: 'admin' | 'user';
-  status: 'active' | 'inactive';
+  role: string;
+  status: string;
   lastLogin?: string;
   created?: string;
   password?: string;
@@ -21,12 +21,12 @@ interface User {
 
 interface UserFormSheetProps {
   isOpen: boolean;
-  onClose: () => void;
+  onCloseAction: () => void;
   user?: User | null;
-  onSave: (user: User) => void;
+  onSaveAction: (user: User) => void;
 }
 
-export function UserFormSheet({ isOpen, onClose, user, onSave }: UserFormSheetProps) {
+export function UserFormSheet({ isOpen, onCloseAction, user, onSaveAction }: UserFormSheetProps) {
   const [formData, setFormData] = useState<User>({
     name: '',
     email: '',
@@ -96,13 +96,13 @@ export function UserFormSheet({ isOpen, onClose, user, onSave }: UserFormSheetPr
       delete userData.password;
     }
 
-    onSave(userData);
+    onSaveAction(userData);
     toast.success(isEditing ? 'User updated successfully' : 'User created successfully');
-    onClose();
+    onCloseAction();
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet open={isOpen} onOpenChange={onCloseAction}>
       <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle>{isEditing ? 'Edit User' : 'Create New User'}</SheetTitle>
@@ -185,7 +185,7 @@ export function UserFormSheet({ isOpen, onClose, user, onSave }: UserFormSheetPr
           )}
 
           <div className="flex justify-end space-x-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onCloseAction}>
               Cancel
             </Button>
             <Button type="submit">

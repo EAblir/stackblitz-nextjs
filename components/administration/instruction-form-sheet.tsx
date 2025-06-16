@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -8,14 +6,18 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { Administration } from '@prisma/client';
+
 
 interface Instruction {
   id?: number;
-  administrationName: string;
-  instruction: string;
-  status: 'ongoing' | 'closed';
-  created?: string;
+  administration?: Administration;
+  content: string;
+  status: string | 'ongoing' | 'closed';
+  createdAt?: string;
 }
+
+
 
 interface InstructionFormSheetProps {
   isOpen: boolean;
@@ -25,11 +27,20 @@ interface InstructionFormSheetProps {
 }
 
 export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: InstructionFormSheetProps) {
+ 
+  const [administrations, setAdministrations] = useState<Administration[]>([]);
   const [formData, setFormData] = useState<Instruction>({
-    administrationName: '',
-    instruction: '',
+    administration: undefined,
+    content: '',
     status: 'ongoing'
   });
+
+  useEffect(() => {
+    fetch('/api/administrations')
+      .then(res => res.json())
+      .then(setAdministrations)
+      .catch(() => toast.error('Failed to load administrations'));
+  }, []);
 
   const isEditing = !!instruction;
 
@@ -38,8 +49,8 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
       setFormData(instruction);
     } else {
       setFormData({
-        administrationName: '',
-        instruction: '',
+        administration: undefined,
+        content: '',
         status: 'ongoing'
       });
     }
@@ -48,7 +59,7 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.administrationName || !formData.instruction) {
+    if (!formData.administration || !formData.content) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -56,7 +67,7 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
     const instructionData = {
       ...formData,
       id: instruction?.id || Date.now(),
-      created: instruction?.created || new Date().toISOString().split('T')[0]
+      createdAt: instruction?.createdAt || new Date().toISOString().split('T')[0]
     };
 
     onSave(instructionData);
@@ -73,13 +84,32 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
         
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <div>
-            <Label htmlFor="administrationName">Administration Name *</Label>
-            <Input
-              id="administrationName"
-              value={formData.administrationName}
-              onChange={(e) => setFormData({...formData, administrationName: e.target.value})}
-              placeholder="Enter administration name"
-            />
+            <Label htmlFor="administrationId">Administration *</Label>
+            <Select
+              value={formData.administration?.id ? String(formData.administration?.id) : ''}
+              onValueChange={(value) =>
+                setFormData({ 
+                  ...formData, 
+                  administration: value === '-1' 
+                    ? undefined 
+                    : administrations.find((admin) => String(admin.id) === value) 
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select administration (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={'-1'} textValue={'*General instruction'}>
+                  General instruction
+                </SelectItem>
+                {administrations.map((admin) => (
+                  <SelectItem key={admin.id} value={String(admin.id)} textValue={admin.administrationName}>
+                    {admin.administrationName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -99,8 +129,8 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
             <Label htmlFor="instruction">Instruction *</Label>
             <Textarea
               id="instruction"
-              value={formData.instruction}
-              onChange={(e) => setFormData({...formData, instruction: e.target.value})}
+              value={formData.content}
+              onChange={(e) => setFormData({...formData, content: e.target.value})}
               placeholder="Enter the instruction details..."
               rows={6}
             />

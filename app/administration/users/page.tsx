@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { UsersTable, User } from '@/components/administration/users-table';
 import { UserFormSheet } from '@/components/administration/user-form-sheet';
@@ -9,52 +9,49 @@ import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-const initialUsers: User[] = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john.doe@company.com',
-    role: 'admin',
-    status: 'active',
-    lastLogin: '2024-01-15 14:30',
-    created: '2024-01-01'
-  },
-  {
-    id: 2,
-    name: 'Sarah Johnson',
-    email: 'sarah.johnson@company.com',
-    role: 'user',
-    status: 'active',
-    lastLogin: '2024-01-15 09:15',
-    created: '2024-01-02'
-  },
-  {
-    id: 3,
-    name: 'Mike Chen',
-    email: 'mike.chen@company.com',
-    role: 'user',
-    status: 'inactive',
-    lastLogin: '2024-01-10 16:45',
-    created: '2024-01-03'
-  }
-];
-
 export default function UsersPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFormSheet, setShowFormSheet] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
 
-  const handleSaveUser = (userData: User) => {
+  // Fetch users from API
+  useEffect(() => {
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(setUsers)
+      .catch(() => toast.error('Failed to load users'));
+  }, []);
+
+  const handleSaveUser = async (userData: User) => {
     if (editingUser) {
-      // Update existing user
-      setUsers(prev => prev.map(user => 
-        user.id === userData.id ? userData : user
-      ));
+      // Update user
+      const res = await fetch('/api/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      if (res.ok) {
+        setUsers(prev => prev.map(u => u.id === userData.id ? userData : u));
+        toast.success('User updated');
+      } else {
+        toast.error('Failed to update user');
+      }
     } else {
-      // Add new user
-      setUsers(prev => [...prev, userData]);
+      // Create user
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      if (res.ok) {
+        const newUser = await res.json();
+        setUsers(prev => [...prev, newUser]);
+        toast.success('User created');
+      } else {
+        toast.error('Failed to create user');
+      }
     }
     setShowFormSheet(false);
     setEditingUser(null);
@@ -65,9 +62,18 @@ export default function UsersPage() {
     setShowFormSheet(true);
   };
 
-  const handleDeleteUser = (id: number) => {
-    setUsers(prev => prev.filter(user => user.id !== id));
-    toast.success('User deleted successfully');
+  const handleDeleteUser = async (id: number) => {
+    const res = await fetch('/api/users', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    if (res.ok) {
+      setUsers(prev => prev.filter(user => user.id !== id));
+      toast.success('User deleted');
+    } else {
+      toast.error('Failed to delete user');
+    }
   };
 
   const handleCreateNew = () => {
@@ -85,7 +91,6 @@ export default function UsersPage() {
             Create User
           </Button>
         </div>
-
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-4">
@@ -100,23 +105,21 @@ export default function UsersPage() {
               </div>
             </div>
           </div>
-
-          <UsersTable 
+          <UsersTable
             searchQuery={searchQuery}
             users={users}
             onEdit={handleEditUser}
             onDelete={handleDeleteUser}
           />
         </div>
-
-        <UserFormSheet 
+        <UserFormSheet
           isOpen={showFormSheet}
-          onClose={() => {
+          onCloseAction={() => {
             setShowFormSheet(false);
             setEditingUser(null);
           }}
           user={editingUser}
-          onSave={handleSaveUser}
+          onSaveAction={handleSaveUser}
         />
       </div>
     </DashboardLayout>

@@ -1,4 +1,3 @@
-'use client';
 
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -21,12 +20,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+import { Administration } from '@prisma/client';
+
 export interface Instruction {
-  id: number;
-  administrationName: string;
-  instruction: string;
-  status: 'ongoing' | 'closed';
-  created: string;
+  id?: number;
+  administration?: Administration;
+  administrationId?: number;
+  content: string;
+  status: string | 'ongoing' | 'closed';
+  createdAt?: string;
 }
 
 interface InstructionsTableProps {
@@ -41,8 +43,8 @@ export function InstructionsTable({ searchQuery, instructions, onEdit, onDelete 
   const [instructionToDelete, setInstructionToDelete] = useState<number | null>(null);
 
   const filteredInstructions = instructions.filter(instruction => 
-    instruction.administrationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase())
+    instruction.administration?.administrationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    instruction.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
@@ -56,8 +58,8 @@ export function InstructionsTable({ searchQuery, instructions, onEdit, onDelete 
     }
   };
 
-  const handleDeleteClick = (id: number) => {
-    setInstructionToDelete(id);
+  const handleDeleteClick = (id?: number) => {
+    setInstructionToDelete(id??null);
     setDeleteDialogOpen(true);
   };
 
@@ -85,14 +87,14 @@ export function InstructionsTable({ searchQuery, instructions, onEdit, onDelete 
           <tbody>
             {filteredInstructions.map((instruction) => (
               <tr key={instruction.id} className="border-t border-gray-200 hover:bg-gray-50">
-                <td className="p-4 font-medium">{instruction.administrationName}</td>
-                <td className="p-4 max-w-md">{instruction.instruction}</td>
+                <td className="p-4 font-medium">{instruction.administration?.administrationName}</td>
+                <td className="p-4 max-w-md">{instruction.content}</td>
                 <td className="p-4">
                   <Badge className={getStatusColor(instruction.status)}>
                     {instruction.status === 'ongoing' ? 'Ongoing' : 'Closed'}
                   </Badge>
                 </td>
-                <td className="p-4 text-sm text-gray-600">{instruction.created}</td>
+                <td className="p-4 text-sm text-gray-600">{instruction.createdAt}</td>
                 <td className="p-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

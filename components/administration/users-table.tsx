@@ -1,4 +1,3 @@
-'use client';
 
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -23,23 +22,23 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export interface User {
-  id: number;
+  id?: number;
   name: string;
   email: string;
-  role: 'admin' | 'user';
-  status: 'active' | 'inactive';
-  lastLogin: string;
-  created: string;
+  role: string;
+  status: string;
+  lastLogin?: string;
+  created?: string;
 }
 
 interface UsersTableProps {
-  searchQuery: string;
   users: User[];
+  searchQuery: string;
   onEdit: (user: User) => void;
   onDelete: (id: number) => void;
 }
 
-export function UsersTable({ searchQuery, users, onEdit, onDelete }: UsersTableProps) {
+export function UsersTable({ users, searchQuery, onEdit, onDelete }: UsersTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   
@@ -64,8 +63,8 @@ export function UsersTable({ searchQuery, users, onEdit, onDelete }: UsersTableP
     return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
 
-  const handleDeleteClick = (id: number) => {
-    setUserToDelete(id);
+  const handleDeleteClick = (id?: number) => {
+    setUserToDelete(id ?? null);
     setDeleteDialogOpen(true);
   };
 
@@ -76,6 +75,13 @@ export function UsersTable({ searchQuery, users, onEdit, onDelete }: UsersTableP
       setUserToDelete(null);
     }
   };
+
+  function formatDate(date?:string) {
+    if (!date) return '';
+    const d = new Date(date);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
 
   return (
     <>
@@ -117,8 +123,8 @@ export function UsersTable({ searchQuery, users, onEdit, onDelete }: UsersTableP
                     {user.status === 'active' ? 'Active' : 'Inactive'}
                   </Badge>
                 </td>
-                <td className="p-4 text-sm text-gray-600">{user.lastLogin}</td>
-                <td className="p-4 text-sm text-gray-600">{user.created}</td>
+                <td className="p-4 text-sm text-gray-600">{formatDate(user.lastLogin)}</td>
+                <td className="p-4 text-sm text-gray-600">{formatDate(user.created)}</td>
                 <td className="p-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

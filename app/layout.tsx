@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Dashboard - Moneybird Style',
-  description: 'Professional dashboard application',
+  title: 'Dashboard',
+  description: 'Dashboard',
 };
 
 export default function RootLayout({

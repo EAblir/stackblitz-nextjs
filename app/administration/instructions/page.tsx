@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { InstructionsTable, Instruction } from '@/components/administration/instructions-table';
 import { InstructionFormSheet } from '@/components/administration/instruction-form-sheet';
@@ -9,47 +9,58 @@ import { Input } from '@/components/ui/input';
 import { Plus, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-const initialInstructions: Instruction[] = [
-  {
-    id: 1,
-    administrationName: 'Acme Corp',
-    instruction: 'All invoices must be processed within 24 hours of receipt.',
-    status: 'ongoing',
-    created: '2024-01-15'
-  },
-  {
-    id: 2,
-    administrationName: 'TechStart Inc',
-    instruction: 'Require manager approval for expenses over €500.',
-    status: 'closed',
-    created: '2024-01-14'
-  },
-  {
-    id: 3,
-    administrationName: 'Global Solutions',
-    instruction: 'Monthly bank reconciliation due by 5th of each month.',
-    status: 'ongoing',
-    created: '2024-01-13'
-  }
-];
+
 
 export default function InstructionsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFormSheet, setShowFormSheet] = useState(false);
   const [editingInstruction, setEditingInstruction] = useState<Instruction | null>(null);
-  const [instructions, setInstructions] = useState<Instruction[]>(initialInstructions);
+  const [instructions, setInstructions] = useState<Instruction[]>([]);
+ 
+  useEffect(() => {
+    fetch('/api/instructions')
+      .then(res => res.json())
+      .then(setInstructions)
+      .catch(() => toast.error('Failed to load users'));
+  }, []);
 
-  const handleSaveInstruction = (instructionData: Instruction) => {
+  const handleSaveInstruction = async (instructionData: Instruction) => {
     if (editingInstruction) {
       // Update existing instruction
-      setInstructions(prev => prev.map(inst => 
-        inst.id === instructionData.id ? instructionData : inst
-      ));
+      const updatedData = instructionData.content;
+      console.log(updatedData);
+      const res = await fetch('/api/instructions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(instructionData),
+      });
+
+      if (res.ok) {
+        setInstructions(prev => prev.map(inst => 
+          inst.id === instructionData.id ? instructionData : inst
+        ));
+
+      } else {
+        toast.error('Failed to update instruction');
+      }
+      
     } else {
+      const res = await fetch('/api/instructions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(instructionData),
+      });
+      
+      if (res.ok) {
+        const newInstruction = await res.json();
+        setInstructions(prev => [...prev, newInstruction]);
+      } else {
+        toast.error('Failed to create instruction');
+      }
       // Add new instruction
-      setInstructions(prev => [...prev, instructionData]);
     }
+
     setShowFormSheet(false);
     setEditingInstruction(null);
   };
@@ -59,9 +70,19 @@ export default function InstructionsPage() {
     setShowFormSheet(true);
   };
 
-  const handleDeleteInstruction = (id: number) => {
-    setInstructions(prev => prev.filter(inst => inst.id !== id));
-    toast.success('Instruction deleted successfully');
+  const handleDeleteInstruction = async (id: number) => {
+    const res = await fetch('/api/instructions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+
+    if (res.ok) {
+      setInstructions(prev => prev.filter(inst => inst.id !== id));
+      toast.success('Instruction deleted successfully');
+    } else {
+      toast.error('Failed to delete instruction');
+    }  
   };
 
   const handleCreateNew = () => {
