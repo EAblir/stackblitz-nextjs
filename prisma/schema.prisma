@@ -22,7 +22,7 @@ model User {
   status    String
   created   DateTime @default(now())
   lastLogin DateTime
-
+  passwordHash String
   messages  Message[]
   assignedMessages Message[] @relation("Assignee")
   workflows Workflow[]

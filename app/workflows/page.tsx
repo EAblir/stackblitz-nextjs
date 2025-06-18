@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { MainNav } from '@/components/layout/mainnav';
 import { WorkflowsTable } from '@/components/workflows/workflows-table';
 import { CreateWorkflowModal } from '@/components/workflows/create-workflow-modal';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ export default function WorkflowsPage() {
   };
 
   return (
-    <DashboardLayout 
+    <MainNav 
       sidebarOpen={sidebarOpen} 
       setSidebarOpen={setSidebarOpen}
       selectedCompanyId={selectedCompanyId}
@@ -145,6 +145,6 @@ export default function WorkflowsPage() {
           onClose={() => setShowCreateModal(false)}
         />
       </div>
-    </DashboardLayout>
+    </MainNav>
   );
 }

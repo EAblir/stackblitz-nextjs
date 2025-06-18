@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Logo from '/images/logo.png';
 
 import { Menu, ChevronDown, Globe, User, Settings, LogOut, ListTree} from 'lucide-react';
 
@@ -35,6 +34,11 @@ export function TopBar({ onMenuClick, isSidebarOpen, selectedCompanyId, onCompan
     const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const handleLogout = () => {
+        // Remove the auth cookie (expires it)
+        document.cookie = 'auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        router.push('/login');
+    };
     useEffect(() => {
         fetchCompanies();
     }, []);
@@ -99,8 +103,9 @@ export function TopBar({ onMenuClick, isSidebarOpen, selectedCompanyId, onCompan
                             <Link href="/">
                                 <Image
                                     alt="Logo"
-                                    src={Logo}
+                                    src="/images/logo.png"
                                     height={36}
+                                    width={132}
                                 />
                             </Link>
                         </div>
@@ -160,7 +165,7 @@ export function TopBar({ onMenuClick, isSidebarOpen, selectedCompanyId, onCompan
                             Preferences
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
                             <LogOut className="w-4 h-4 mr-2" />
                             Logout
                         </DropdownMenuItem>

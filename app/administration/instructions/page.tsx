@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { MainNav } from '@/components/layout/mainnav';
 import { InstructionsTable, Instruction } from '@/components/administration/instructions-table';
 import { InstructionFormSheet } from '@/components/administration/instruction-form-sheet';
 import { Button } from '@/components/ui/button';
@@ -151,7 +151,7 @@ export default function InstructionsPage() {
 
   if (loading) {
     return (
-      <DashboardLayout 
+      <MainNav 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen}
         selectedCompanyId={selectedCompanyId}
@@ -165,12 +165,12 @@ export default function InstructionsPage() {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </MainNav>
     );
   }
 
   return (
-    <DashboardLayout 
+    <MainNav 
       sidebarOpen={sidebarOpen} 
       setSidebarOpen={setSidebarOpen}
       selectedCompanyId={selectedCompanyId}
@@ -246,6 +246,6 @@ export default function InstructionsPage() {
           selectedCompanyId={selectedCompanyId}
         />
       </div>
-    </DashboardLayout>
+    </MainNav>
   );
 }

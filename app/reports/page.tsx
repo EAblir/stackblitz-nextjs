@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { MainNav } from '@/components/layout/mainnav';
 import { ReportsGrid } from '@/components/reports/reports-grid';
 import { RecentReports } from '@/components/reports/recent-reports';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ export default function ReportsPage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   return (
-    <DashboardLayout 
+    <MainNav 
       sidebarOpen={sidebarOpen} 
       setSidebarOpen={setSidebarOpen}
       selectedCompanyId={selectedCompanyId}
@@ -128,6 +128,6 @@ export default function ReportsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </MainNav>
   );
 }

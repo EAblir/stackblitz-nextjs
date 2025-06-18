@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { MainNav } from '@/components/layout/mainnav';
 import { MessagesTable, Message } from '@/components/messages/messages-table';
 import { MessageFormSheet } from '@/components/messages/message-form-sheet';
 import { Button } from '@/components/ui/button';
@@ -141,7 +141,7 @@ export default function MessagesPage() {
 
   if (loading) {
     return (
-      <DashboardLayout 
+      <MainNav 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen}
         selectedCompanyId={selectedCompanyId}
@@ -155,12 +155,12 @@ export default function MessagesPage() {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </MainNav>
     );
   }
 
   return (
-    <DashboardLayout 
+    <MainNav 
       sidebarOpen={sidebarOpen} 
       setSidebarOpen={setSidebarOpen}
       selectedCompanyId={selectedCompanyId}
@@ -251,6 +251,6 @@ export default function MessagesPage() {
           onSave={handleSaveMessage}
         />
       </div>
-    </DashboardLayout>
+    </MainNav>
   );
 }

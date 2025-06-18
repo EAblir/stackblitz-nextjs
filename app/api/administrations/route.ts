@@ -4,7 +4,10 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function GET() {
-  const administrations = await prisma.administration.findMany();
+  const administrations = await prisma.administration.findMany({include: {
+      company: true
+    }
+  });
   return NextResponse.json(administrations);
 }
 

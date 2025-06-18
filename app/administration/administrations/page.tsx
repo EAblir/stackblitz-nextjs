@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { MainNav } from '@/components/layout/mainnav';
 import { AdministrationsTable, Administration } from '@/components/administration/administrations-table';
 import { AdministrationFormSheet } from '@/components/administration/administration-form-sheet';
 import { Button } from '@/components/ui/button';
@@ -162,7 +162,7 @@ export default function AdministrationsPage() {
 
   if (loading) {
     return (
-      <DashboardLayout 
+      <MainNav 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen}
         selectedCompanyId={selectedCompanyId}
@@ -176,12 +176,12 @@ export default function AdministrationsPage() {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </MainNav>
     );
   }
 
   return (
-    <DashboardLayout 
+    <MainNav 
       sidebarOpen={sidebarOpen} 
       setSidebarOpen={setSidebarOpen}
       selectedCompanyId={selectedCompanyId}
@@ -264,6 +264,6 @@ export default function AdministrationsPage() {
           onSave={handleSaveAdministration}
         />
       </div>
-    </DashboardLayout>
+    </MainNav>
   );
 }

@@ -77,6 +77,7 @@ async function main() {
         status: 'active',
         created: new Date('2024-01-10'),
         lastLogin: new Date('2024-01-15'),
+        passwordHash: '$2a$10$KJYW99I.NiWC79uVek4HQONURuPwalgpFUpMg/XducuS5kJdOYjie',
       },
       {
         id: 2,
@@ -86,6 +87,7 @@ async function main() {
         status: 'active',
         created: new Date('2024-01-11'),
         lastLogin: new Date('2024-01-14'),
+        passwordHash: '$2a$10$KJYW99I.NiWC79uVek4HQONURuPwalgpFUpMg/XducuS5kJdOYjie',
       },
       {
         id: 3,
@@ -95,6 +97,7 @@ async function main() {
         status: 'inactive',
         created: new Date('2024-01-12'),
         lastLogin: new Date('2024-01-13'),
+        passwordHash: '$2a$10$KJYW99I.NiWC79uVek4HQONURuPwalgpFUpMg/XducuS5kJdOYjie',
       },
       {
         id: 4,
@@ -104,6 +107,7 @@ async function main() {
         status: 'active',
         created: new Date('2024-01-13'),
         lastLogin: new Date('2024-01-16'),
+        passwordHash: '$2a$10$KJYW99I.NiWC79uVek4HQONURuPwalgpFUpMg/XducuS5kJdOYjie',
       },
       {
         id: 5,
@@ -113,6 +117,7 @@ async function main() {
         status: 'active',
         created: new Date('2024-01-14'),
         lastLogin: new Date('2024-01-17'),
+        passwordHash: '$2a$10$KJYW99I.NiWC79uVek4HQONURuPwalgpFUpMg/XducuS5kJdOYjie',
       }
     ],
   });

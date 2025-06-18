@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { MainNav } from '@/components/layout/mainnav';
 import { IntegrationsGrid } from '@/components/integrations/integrations-grid';
 import { ConnectedIntegrations } from '@/components/integrations/connected-integrations';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ export default function IntegrationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <DashboardLayout 
+    <MainNav 
       sidebarOpen={sidebarOpen} 
       setSidebarOpen={setSidebarOpen}
       selectedCompanyId={selectedCompanyId}
@@ -60,6 +60,6 @@ export default function IntegrationsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </MainNav>
   );
 }

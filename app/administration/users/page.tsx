@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { MainNav } from '@/components/layout/mainnav';
 import { UsersTable, User } from '@/components/administration/users-table';
 import { UserFormSheet } from '@/components/administration/user-form-sheet';
 import { Button } from '@/components/ui/button';
@@ -83,7 +83,7 @@ export default function UsersPage() {
   };
 
   return (
-    <DashboardLayout 
+    <MainNav 
       sidebarOpen={sidebarOpen} 
       setSidebarOpen={setSidebarOpen}
       selectedCompanyId={selectedCompanyId}
@@ -128,6 +128,6 @@ export default function UsersPage() {
           onSaveAction={handleSaveUser}
         />
       </div>
-    </DashboardLayout>
+    </MainNav>
   );
 }
