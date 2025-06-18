@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -11,25 +11,69 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Logo from '/images/logo.png';
 
 import { Menu, ChevronDown, Globe, User, Settings, LogOut, ListTree} from 'lucide-react';
 
+interface Company {
+    id: number;
+    name: string;
+}
+
 interface TopBarProps {
     onMenuClick: () => void;
     isSidebarOpen: boolean;
+    selectedCompanyId?: number;
+    onCompanyChange?: (companyId: number) => void;
 }
 
-export function TopBar({ onMenuClick, isSidebarOpen }: TopBarProps) {
-    const [currentCompany, setCurrentCompany] = useState('Acme Corporation');
-    const [showBrowserAgent, setShowBrowserAgent] = useState(false);
+export function TopBar({ onMenuClick, isSidebarOpen, selectedCompanyId, onCompanyChange }: TopBarProps) {
+    const router = useRouter();
+    const [companies, setCompanies] = useState<Company[]>([]);
+    const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const companies = [
-        'Acme Corporation',
-        'TechStart Inc.',
-        'Global Solutions Ltd.',
-        'Innovation Co.',
-    ];
+    useEffect(() => {
+        fetchCompanies();
+    }, []);
+
+    useEffect(() => {
+        if (companies.length > 0 && selectedCompanyId) {
+            const company = companies.find(c => c.id === selectedCompanyId);
+            if (company) {
+                setCurrentCompany(company);
+            }
+        } else if (companies.length > 0 && !currentCompany) {
+            // Set first company as default if none selected
+            setCurrentCompany(companies[0]);
+            onCompanyChange?.(companies[0].id);
+        }
+    }, [companies, selectedCompanyId, currentCompany, onCompanyChange]);
+
+    const fetchCompanies = async () => {
+        try {
+            const response = await fetch('/api/companies');
+            if (response.ok) {
+                const data = await response.json();
+                setCompanies(data);
+            }
+        } catch (error) {
+            console.error('Error fetching companies:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCompanyChange = (company: Company) => {
+        setCurrentCompany(company);
+        onCompanyChange?.(company.id);
+    };
+
+    const handleUserSettingsClick = () => {
+        router.push('/administration/users');
+    };
 
     return (
         <div
@@ -52,36 +96,39 @@ export function TopBar({ onMenuClick, isSidebarOpen }: TopBarProps) {
                     </Button>
                     <div className="flex items-center space-x-4">
                         <div className="flex items-center">
-                            <a href="/">
-                            <Image
-                                alt="Logo"
-                                src={Logo}
-                                height={36}
+                            <Link href="/">
+                                <Image
+                                    alt="Logo"
+                                    src={Logo}
+                                    height={36}
                                 />
-                            </a>
+                            </Link>
                         </div>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="flex items-center space-x-2 hover:text-[#31446a] text-white">
-                                    <span className="font-medium">{currentCompany}</span>
-                                    <ChevronDown className="w-4 h-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-48">
-                                {companies.map((company) => (
-                                    <DropdownMenuItem
-                                        key={company}
-                                        onClick={() => setCurrentCompany(company)}
-                                        className={currentCompany === company ? 'bg-blue-50' : ''}
-                                    >
-                                        {company}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-
-                       </div>
+                        {!loading && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="flex items-center space-x-2 hover:text-[#31446a] text-white">
+                                        <span className="font-medium">
+                                            {currentCompany?.name || 'Select Company'}
+                                        </span>
+                                        <ChevronDown className="w-4 h-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-48">
+                                    {companies.map((company) => (
+                                        <DropdownMenuItem
+                                            key={company.id}
+                                            onClick={() => handleCompanyChange(company)}
+                                            className={currentCompany?.id === company.id ? 'bg-blue-50' : ''}
+                                        >
+                                            {company.name}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
+                    </div>
                 </div>
 
                 <DropdownMenu>
@@ -104,7 +151,7 @@ export function TopBar({ onMenuClick, isSidebarOpen }: TopBarProps) {
                             <div className="text-xs text-gray-500">Administrator</div>
                         </div>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleUserSettingsClick}>
                             <User className="w-4 h-4 mr-2" />
                             User Settings
                         </DropdownMenuItem>

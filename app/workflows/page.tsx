@@ -13,6 +13,7 @@ import { downloadExcel, downloadPDF } from '@/lib/export-utils';
 
 export default function WorkflowsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number>();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -36,7 +37,12 @@ export default function WorkflowsPage() {
   };
 
   return (
-    <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+    <DashboardLayout 
+      sidebarOpen={sidebarOpen} 
+      setSidebarOpen={setSidebarOpen}
+      selectedCompanyId={selectedCompanyId}
+      onCompanyChange={setSelectedCompanyId}
+    >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>

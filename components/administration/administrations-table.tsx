@@ -21,6 +21,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+interface Company {
+  id: number;
+  name: string;
+}
+
 export interface Administration {
   id: number;
   accountingOffice: string;
@@ -29,6 +34,8 @@ export interface Administration {
   days: string[];
   status: 'open' | 'ongoing' | 'done';
   lastModified: string;
+  companyId?: number;
+  company?: Company;
 }
 
 interface AdministrationsTableProps {
@@ -44,7 +51,8 @@ export function AdministrationsTable({ searchQuery, administrations, onEdit, onD
 
   const filteredAdministrations = administrations.filter(admin => 
     admin.accountingOffice.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    admin.administrationName.toLowerCase().includes(searchQuery.toLowerCase())
+    admin.administrationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (admin.company?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
@@ -86,6 +94,7 @@ export function AdministrationsTable({ searchQuery, administrations, onEdit, onD
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
+              <th className="text-left p-4 font-medium text-gray-700">Company</th>
               <th className="text-left p-4 font-medium text-gray-700">Accounting Office</th>
               <th className="text-left p-4 font-medium text-gray-700">Administration Name</th>
               <th className="text-left p-4 font-medium text-gray-700">Schedule</th>
@@ -98,6 +107,7 @@ export function AdministrationsTable({ searchQuery, administrations, onEdit, onD
           <tbody>
             {filteredAdministrations.map((admin) => (
               <tr key={admin.id} className="border-t border-gray-200 hover:bg-gray-50">
+                <td className="p-4 font-medium">{admin.company?.name || 'No Company'}</td>
                 <td className="p-4 font-medium">{admin.accountingOffice}</td>
                 <td className="p-4">{admin.administrationName}</td>
                 <td className="p-4 capitalize">{admin.schedule}</td>

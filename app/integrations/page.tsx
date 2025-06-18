@@ -11,10 +11,16 @@ import { Search, Plus } from 'lucide-react';
 
 export default function IntegrationsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number>();
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+    <DashboardLayout 
+      sidebarOpen={sidebarOpen} 
+      setSidebarOpen={setSidebarOpen}
+      selectedCompanyId={selectedCompanyId}
+      onCompanyChange={setSelectedCompanyId}
+    >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>

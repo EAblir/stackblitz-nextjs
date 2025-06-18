@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Administration } from '@prisma/client';
 
-
 interface Instruction {
   id?: number;
   administration?: Administration;
@@ -17,17 +16,21 @@ interface Instruction {
   createdAt?: string;
 }
 
-
-
 interface InstructionFormSheetProps {
   isOpen: boolean;
   onClose: () => void;
   instruction?: Instruction | null;
   onSave: (instruction: Instruction) => void;
+  selectedCompanyId?: number;
 }
 
-export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: InstructionFormSheetProps) {
- 
+export function InstructionFormSheet({ 
+  isOpen, 
+  onClose, 
+  instruction, 
+  onSave, 
+  selectedCompanyId 
+}: InstructionFormSheetProps) {
   const [administrations, setAdministrations] = useState<Administration[]>([]);
   const [formData, setFormData] = useState<Instruction>({
     administration: undefined,
@@ -36,11 +39,29 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
   });
 
   useEffect(() => {
-    fetch('/api/administrations')
-      .then(res => res.json())
-      .then(setAdministrations)
-      .catch(() => toast.error('Failed to load administrations'));
-  }, []);
+    if (isOpen) {
+      fetchAdministrations();
+    }
+  }, [isOpen, selectedCompanyId]);
+
+  const fetchAdministrations = async () => {
+    try {
+      const response = await fetch('/api/administrations');
+      if (response.ok) {
+        const data = await response.json();
+        // Filter by selected company if available
+        const filtered = selectedCompanyId 
+          ? data.filter((admin: Administration) => admin.companyId === selectedCompanyId)
+          : data;
+        setAdministrations(filtered);
+      } else {
+        toast.error('Failed to load administrations');
+      }
+    } catch (error) {
+      console.error('Error fetching administrations:', error);
+      toast.error('Failed to load administrations');
+    }
+  };
 
   const isEditing = !!instruction;
 
@@ -59,7 +80,7 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.administration || !formData.content) {
+    if (!formData.content) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -84,7 +105,7 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
         
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <div>
-            <Label htmlFor="administrationId">Administration *</Label>
+            <Label htmlFor="administrationId">Administration</Label>
             <Select
               value={formData.administration?.id ? String(formData.administration?.id) : ''}
               onValueChange={(value) =>
@@ -110,6 +131,11 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
                 ))}
               </SelectContent>
             </Select>
+            {selectedCompanyId && administrations.length === 0 && (
+              <p className="text-sm text-gray-500 mt-1">
+                No administrations found for the selected company.
+              </p>
+            )}
           </div>
 
           <div>

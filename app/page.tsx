@@ -10,6 +10,7 @@ import { Clock, HelpCircle, FileText, MessageSquare } from 'lucide-react';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number>();
 
   const metrics = [
     {
@@ -47,7 +48,12 @@ export default function Dashboard() {
   ];
 
   return (
-    <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+    <DashboardLayout 
+      sidebarOpen={sidebarOpen} 
+      setSidebarOpen={setSidebarOpen}
+      selectedCompanyId={selectedCompanyId}
+      onCompanyChange={setSelectedCompanyId}
+    >
       <div className="p-6 space-y-6">
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

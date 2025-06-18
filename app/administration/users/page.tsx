@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 export default function UsersPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number>();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFormSheet, setShowFormSheet] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -82,7 +83,12 @@ export default function UsersPage() {
   };
 
   return (
-    <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+    <DashboardLayout 
+      sidebarOpen={sidebarOpen} 
+      setSidebarOpen={setSidebarOpen}
+      selectedCompanyId={selectedCompanyId}
+      onCompanyChange={setSelectedCompanyId}
+    >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">User Management</h1>

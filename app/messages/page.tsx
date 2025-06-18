@@ -13,6 +13,7 @@ import { downloadExcel, downloadPDF } from '@/lib/export-utils';
 
 export default function MessagesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number>();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -140,7 +141,12 @@ export default function MessagesPage() {
 
   if (loading) {
     return (
-      <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+      <DashboardLayout 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen}
+        selectedCompanyId={selectedCompanyId}
+        onCompanyChange={setSelectedCompanyId}
+      >
         <div className="p-6">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -154,7 +160,12 @@ export default function MessagesPage() {
   }
 
   return (
-    <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+    <DashboardLayout 
+      sidebarOpen={sidebarOpen} 
+      setSidebarOpen={setSidebarOpen}
+      selectedCompanyId={selectedCompanyId}
+      onCompanyChange={setSelectedCompanyId}
+    >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Messages</h1>

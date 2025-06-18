@@ -12,57 +12,94 @@ import { downloadExcel, downloadPDF } from '@/lib/export-utils';
 
 export default function InstructionsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number>();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFormSheet, setShowFormSheet] = useState(false);
   const [editingInstruction, setEditingInstruction] = useState<Instruction | null>(null);
   const [instructions, setInstructions] = useState<Instruction[]>([]);
+  const [allInstructions, setAllInstructions] = useState<Instruction[]>([]);
   const [exporting, setExporting] = useState(false);
+  const [loading, setLoading] = useState(true);
  
   useEffect(() => {
-    fetch('/api/instructions')
-      .then(res => res.json())
-      .then(setInstructions)
-      .catch(() => toast.error('Failed to load instructions'));
+    fetchInstructions();
   }, []);
 
-  const handleSaveInstruction = async (instructionData: Instruction) => {
-    if (editingInstruction) {
-      // Update existing instruction
-      const updatedData = instructionData.content;
-      console.log(updatedData);
-      const res = await fetch('/api/instructions', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(instructionData),
-      });
-
-      if (res.ok) {
-        setInstructions(prev => prev.map(inst => 
-          inst.id === instructionData.id ? instructionData : inst
-        ));
-
-      } else {
-        toast.error('Failed to update instruction');
-      }
-      
+  // Filter instructions based on selected company
+  useEffect(() => {
+    if (selectedCompanyId) {
+      const filtered = allInstructions.filter(instruction => 
+        instruction.administration?.companyId === selectedCompanyId || 
+        !instruction.administration // Include general instructions
+      );
+      setInstructions(filtered);
     } else {
-      const res = await fetch('/api/instructions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(instructionData),
-      });
-      
-      if (res.ok) {
-        const newInstruction = await res.json();
-        setInstructions(prev => [...prev, newInstruction]);
-      } else {
-        toast.error('Failed to create instruction');
-      }
-      // Add new instruction
+      setInstructions(allInstructions);
     }
+  }, [selectedCompanyId, allInstructions]);
 
-    setShowFormSheet(false);
-    setEditingInstruction(null);
+  const fetchInstructions = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/instructions');
+      if (response.ok) {
+        const data = await response.json();
+        setAllInstructions(data);
+        setInstructions(data);
+      } else {
+        toast.error('Failed to load instructions');
+      }
+    } catch (error) {
+      console.error('Error fetching instructions:', error);
+      toast.error('Failed to load instructions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveInstruction = async (instructionData: Instruction) => {
+    try {
+      if (editingInstruction) {
+        // Update existing instruction
+        const response = await fetch('/api/instructions', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(instructionData),
+        });
+
+        if (response.ok) {
+          const updatedInstruction = await response.json();
+          setAllInstructions(prev => prev.map(inst => 
+            inst.id === updatedInstruction.id ? updatedInstruction : inst
+          ));
+          toast.success('Instruction updated successfully');
+        } else {
+          toast.error('Failed to update instruction');
+          return;
+        }
+      } else {
+        const response = await fetch('/api/instructions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(instructionData),
+        });
+        
+        if (response.ok) {
+          const newInstruction = await response.json();
+          setAllInstructions(prev => [...prev, newInstruction]);
+          toast.success('Instruction created successfully');
+        } else {
+          toast.error('Failed to create instruction');
+          return;
+        }
+      }
+
+      setShowFormSheet(false);
+      setEditingInstruction(null);
+    } catch (error) {
+      console.error('Error saving instruction:', error);
+      toast.error('Failed to save instruction');
+    }
   };
 
   const handleEditInstruction = (instruction: Instruction) => {
@@ -71,18 +108,23 @@ export default function InstructionsPage() {
   };
 
   const handleDeleteInstruction = async (id: number) => {
-    const res = await fetch('/api/instructions', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
+    try {
+      const response = await fetch('/api/instructions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
 
-    if (res.ok) {
-      setInstructions(prev => prev.filter(inst => inst.id !== id));
-      toast.success('Instruction deleted successfully');
-    } else {
+      if (response.ok) {
+        setAllInstructions(prev => prev.filter(inst => inst.id !== id));
+        toast.success('Instruction deleted successfully');
+      } else {
+        toast.error('Failed to delete instruction');
+      }
+    } catch (error) {
+      console.error('Error deleting instruction:', error);
       toast.error('Failed to delete instruction');
-    }  
+    }
   };
 
   const handleCreateNew = () => {
@@ -107,11 +149,43 @@ export default function InstructionsPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <DashboardLayout 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen}
+        selectedCompanyId={selectedCompanyId}
+        onCompanyChange={setSelectedCompanyId}
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading instructions...</p>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+    <DashboardLayout 
+      sidebarOpen={sidebarOpen} 
+      setSidebarOpen={setSidebarOpen}
+      selectedCompanyId={selectedCompanyId}
+      onCompanyChange={setSelectedCompanyId}
+    >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Instructions</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Instructions</h1>
+            {selectedCompanyId && (
+              <p className="text-gray-600 mt-1">
+                Showing instructions for selected company and general instructions
+              </p>
+            )}
+          </div>
           <div className="flex items-center space-x-3">
             <Button onClick={handleCreateNew}>
               <Plus className="w-4 h-4 mr-2" />
@@ -169,6 +243,7 @@ export default function InstructionsPage() {
           }}
           instruction={editingInstruction}
           onSave={handleSaveInstruction}
+          selectedCompanyId={selectedCompanyId}
         />
       </div>
     </DashboardLayout>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { AdministrationsTable, Administration } from '@/components/administration/administrations-table';
 import { AdministrationFormSheet } from '@/components/administration/administration-form-sheet';
@@ -10,56 +10,103 @@ import { Plus, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadExcel, downloadPDF } from '@/lib/export-utils';
 
-const initialAdministrations: Administration[] = [
-  {
-    id: 1,
-    accountingOffice: 'Premier Accounting',
-    administrationName: 'Acme Corp',
-    schedule: 'monthly',
-    days: ['1'],
-    status: 'open',
-    lastModified: '2024-01-15'
-  },
-  {
-    id: 2,
-    accountingOffice: 'Financial Partners',
-    administrationName: 'TechStart Inc',
-    schedule: 'weekly',
-    days: ['Friday'],
-    status: 'ongoing',
-    lastModified: '2024-01-14'
-  },
-  {
-    id: 3,
-    accountingOffice: 'Accounting Plus',
-    administrationName: 'Global Solutions',
-    schedule: 'daily',
-    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    status: 'done',
-    lastModified: '2024-01-13'
-  }
-];
-
 export default function AdministrationsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number>();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFormSheet, setShowFormSheet] = useState(false);
   const [editingAdministration, setEditingAdministration] = useState<Administration | null>(null);
-  const [administrations, setAdministrations] = useState<Administration[]>(initialAdministrations);
+  const [administrations, setAdministrations] = useState<Administration[]>([]);
+  const [allAdministrations, setAllAdministrations] = useState<Administration[]>([]);
   const [exporting, setExporting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSaveAdministration = (administrationData: Administration) => {
-    if (editingAdministration) {
-      // Update existing administration
-      setAdministrations(prev => prev.map(admin => 
-        admin.id === administrationData.id ? administrationData : admin
-      ));
+  // Fetch administrations from API
+  useEffect(() => {
+    fetchAdministrations();
+  }, []);
+
+  // Filter administrations based on selected company
+  useEffect(() => {
+    if (selectedCompanyId) {
+      const filtered = allAdministrations.filter(admin => 
+        admin.companyId === selectedCompanyId
+      );
+      setAdministrations(filtered);
     } else {
-      // Add new administration
-      setAdministrations(prev => [...prev, administrationData]);
+      setAdministrations(allAdministrations);
     }
-    setShowFormSheet(false);
-    setEditingAdministration(null);
+  }, [selectedCompanyId, allAdministrations]);
+
+  const fetchAdministrations = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/administrations');
+      if (response.ok) {
+        const data = await response.json();
+        setAllAdministrations(data);
+        setAdministrations(data);
+      } else {
+        toast.error('Failed to load administrations');
+      }
+    } catch (error) {
+      console.error('Error fetching administrations:', error);
+      toast.error('Failed to load administrations');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAdministration = async (administrationData: Administration) => {
+    try {
+      if (editingAdministration) {
+        // Update existing administration
+        const response = await fetch('/api/administrations', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...administrationData,
+            companyId: selectedCompanyId
+          }),
+        });
+
+        if (response.ok) {
+          const updatedAdmin = await response.json();
+          setAllAdministrations(prev => prev.map(admin => 
+            admin.id === updatedAdmin.id ? updatedAdmin : admin
+          ));
+          toast.success('Administration updated successfully');
+        } else {
+          toast.error('Failed to update administration');
+          return;
+        }
+      } else {
+        // Add new administration
+        const response = await fetch('/api/administrations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...administrationData,
+            companyId: selectedCompanyId
+          }),
+        });
+
+        if (response.ok) {
+          const newAdmin = await response.json();
+          setAllAdministrations(prev => [...prev, newAdmin]);
+          toast.success('Administration created successfully');
+        } else {
+          toast.error('Failed to create administration');
+          return;
+        }
+      }
+
+      setShowFormSheet(false);
+      setEditingAdministration(null);
+    } catch (error) {
+      console.error('Error saving administration:', error);
+      toast.error('Failed to save administration');
+    }
   };
 
   const handleEditAdministration = (administration: Administration) => {
@@ -67,12 +114,31 @@ export default function AdministrationsPage() {
     setShowFormSheet(true);
   };
 
-  const handleDeleteAdministration = (id: number) => {
-    setAdministrations(prev => prev.filter(admin => admin.id !== id));
-    toast.success('Administration deleted successfully');
+  const handleDeleteAdministration = async (id: number) => {
+    try {
+      const response = await fetch('/api/administrations', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        setAllAdministrations(prev => prev.filter(admin => admin.id !== id));
+        toast.success('Administration deleted successfully');
+      } else {
+        toast.error('Failed to delete administration');
+      }
+    } catch (error) {
+      console.error('Error deleting administration:', error);
+      toast.error('Failed to delete administration');
+    }
   };
 
   const handleCreateNew = () => {
+    if (!selectedCompanyId) {
+      toast.error('Please select a company first');
+      return;
+    }
     setEditingAdministration(null);
     setShowFormSheet(true);
   };
@@ -94,13 +160,45 @@ export default function AdministrationsPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <DashboardLayout 
+        sidebarOpen={sidebarOpen} 
+        setSidebarOpen={setSidebarOpen}
+        selectedCompanyId={selectedCompanyId}
+        onCompanyChange={setSelectedCompanyId}
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading administrations...</p>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+    <DashboardLayout 
+      sidebarOpen={sidebarOpen} 
+      setSidebarOpen={setSidebarOpen}
+      selectedCompanyId={selectedCompanyId}
+      onCompanyChange={setSelectedCompanyId}
+    >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Administrations</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Administrations</h1>
+            {selectedCompanyId && (
+              <p className="text-gray-600 mt-1">
+                Showing administrations for selected company
+              </p>
+            )}
+          </div>
           <div className="flex items-center space-x-3">
-            <Button onClick={handleCreateNew}>
+            <Button onClick={handleCreateNew} disabled={!selectedCompanyId}>
               <Plus className="w-4 h-4 mr-2" />
               Create Administration
             </Button>
@@ -124,6 +222,14 @@ export default function AdministrationsPage() {
             </div>
           </div>
         </div>
+
+        {!selectedCompanyId && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p className="text-yellow-800">
+              Please select a company from the dropdown in the top bar to view and manage administrations.
+            </p>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
