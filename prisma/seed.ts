@@ -3,6 +3,14 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Companies
+  await prisma.message.deleteMany({});
+  await prisma.instruction.deleteMany({});
+  await prisma.administration.deleteMany({});
+  await prisma.workflow.deleteMany({});
+  await prisma.workflowStep.deleteMany({});
+  await prisma.user.deleteMany({});
+  await prisma.company.deleteMany?.({});
+
   const companies = await prisma.company.createMany({
     data: [
       {
@@ -62,6 +70,7 @@ async function main() {
   const users = await prisma.user.createMany({
     data: [
       {
+        id: 1,
         name: 'John Doe',
         email: 'john.doe@example.com',
         role: 'admin',
@@ -70,6 +79,7 @@ async function main() {
         lastLogin: new Date('2024-01-15'),
       },
       {
+        id: 2,
         name: 'Sarah Johnson',
         email: 'sarah.johnson@example.com',
         role: 'user',
@@ -78,6 +88,7 @@ async function main() {
         lastLogin: new Date('2024-01-14'),
       },
       {
+        id: 3,
         name: 'Mike Chen',
         email: 'mike.chen@example.com',
         role: 'user',
@@ -86,6 +97,7 @@ async function main() {
         lastLogin: new Date('2024-01-13'),
       },
       {
+        id: 4,
         name: 'Emma Davis',
         email: 'emma.davis@example.com',
         role: 'user',
@@ -94,6 +106,7 @@ async function main() {
         lastLogin: new Date('2024-01-16'),
       },
       {
+        id: 5,
         name: 'Alex Rodriguez',
         email: 'alex.rodriguez@example.com',
         role: 'admin',
@@ -191,7 +204,7 @@ async function main() {
         invoiceNumber: 'INV-2024-001',
         fields: 'Invoice number, G/L code',
         message: 'Need clarification on the VAT calculation for this invoice.',
-        assignee: 'John Doe',
+        assigneeId: 2,
         created: new Date('2024-01-15'),
         userId: 1,
       },
@@ -202,7 +215,7 @@ async function main() {
         invoiceNumber: 'INV-2024-002',
         fields: 'VAT code',
         message: 'The VAT rate seems incorrect for EU transactions.',
-        assignee: 'Sarah Johnson',
+        assigneeId: 1,
         created: new Date('2024-01-14'),
         userId: 2,
       },
@@ -213,7 +226,7 @@ async function main() {
         invoiceNumber: 'INV-2024-003',
         fields: 'G/L code',
         message: 'Which account should be used for office supplies?',
-        assignee: 'Mike Chen',
+        assigneeId: 3,
         created: new Date('2024-01-13'),
         userId: 3,
       },
@@ -224,7 +237,7 @@ async function main() {
         invoiceNumber: 'INV-2024-004',
         fields: 'Payment terms',
         message: 'What are the standard payment terms for new clients?',
-        assignee: 'Emma Davis',
+        assigneeId: 1,
         created: new Date('2024-01-16'),
         userId: 4,
       }

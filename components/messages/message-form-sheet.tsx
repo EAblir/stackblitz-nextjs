@@ -28,7 +28,8 @@ interface Message {
   invoiceNumber?: string;
   fields?: string;
   message: string;
-  assignee?: string;
+  assignee?: User;
+  assigneeId?: number;
   created?: string;
   user?: User;
   userId?: number;
@@ -50,7 +51,7 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
     message: '',
     invoiceNumber: '',
     fields: '',
-    assignee: ''
+    assigneeId: undefined
   });
 
   const isEditing = !!message;
@@ -83,7 +84,7 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
         message: '',
         invoiceNumber: '',
         fields: '',
-        assignee: ''
+        assigneeId: undefined
       });
     }
   }, [message]);
@@ -155,7 +156,7 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
                 <SelectValue placeholder="Select administration (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No administration</SelectItem>
+                <SelectItem value={String(undefined)}>No administration</SelectItem>
                 {administrations.map((admin) => (
                   <SelectItem key={admin.id} value={String(admin.id)}>
                     {admin.administrationName}
@@ -189,14 +190,16 @@ export function MessageFormSheet({ isOpen, onClose, message, onSave }: MessageFo
 
           <div>
             <Label htmlFor="assignee">Assignee</Label>
-            <Select value={formData.assignee || ''} onValueChange={(value) => setFormData({...formData, assignee: value})}>
+            <Select value={formData.assigneeId ? String(formData.assigneeId) : ''} 
+              onValueChange={(value) => setFormData({...formData, assigneeId: value ? parseInt(value) : undefined})}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select assignee (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No assignee</SelectItem>
+                <SelectItem value={String(undefined)}>No assignee</SelectItem>
                 {users.map((user) => (
-                  <SelectItem key={user.id} value={user.name}>
+                  <SelectItem key={user.id} value={String(user.id)}>
                     {user.name}
                   </SelectItem>
                 ))}

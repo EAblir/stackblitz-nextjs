@@ -24,6 +24,7 @@ model User {
   lastLogin DateTime
 
   messages  Message[]
+  assignedMessages Message[] @relation("Assignee")
   workflows Workflow[]
 }
 
@@ -70,18 +71,20 @@ model Instruction {
 }
 
 model Message {
-  id                  Int             @id @default(autoincrement())
-  type                String
-  status              String
-  administrationId    Int?
-  administration      Administration?  @relation(fields: [administrationId], references: [id])
-  invoiceNumber       String?
-  fields              String?
-  message             String
-  assignee            String?
-  created             DateTime        @default(now())
-  userId              Int
-  user                User  @relation(fields: [userId], references: [id])
+  id               Int      @id @default(autoincrement())
+  type             String
+  status           String
+  administrationId Int?
+  invoiceNumber    String?
+  fields           String?
+  message          String
+  assigneeId       Int?     // <-- Foreign key to User
+  created          DateTime @default(now())
+  userId           Int?
+
+  administration   Administration? @relation(fields: [administrationId], references: [id])
+  user             User?           @relation(fields: [userId], references: [id])
+  assignee         User?           @relation("Assignee", fields: [assigneeId], references: [id])
 }
 
 model Workflow {

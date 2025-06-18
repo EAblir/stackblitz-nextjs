@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -22,13 +22,21 @@ interface SidebarProps {
 export function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
   const [administrationOpen, setAdministrationOpen] = useState(false);
+  const [messageCount, setMessageCount] = useState<number>(0);
+
+  useEffect(() => {
+    fetch('/api/messages/count')
+      .then(res => res.json())
+      .then(data => setMessageCount(data.count))
+      .catch(() => setMessageCount(0));
+  }, []);
 
   const menuItems = [
     { 
       name: 'Messages', 
       href: '/messages', 
       icon: MessageSquare, 
-      badge: 5 
+      badge: messageCount 
     },
     { 
       name: 'Workflows', 

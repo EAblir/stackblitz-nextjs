@@ -41,7 +41,8 @@ export interface Message {
   invoiceNumber?: string;
   fields?: string;
   message: string;
-  assignee?: string;
+  assignee?: User;
+  assigneeId?: number;
   created?: string;
   user?: User;
   userId?: number;
@@ -102,13 +103,13 @@ export function MessagesTable({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800 hover:bg-orange/80';
       case 'answered':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 hover:bg-blue/80';
       case 'resolved':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 hover:bg-green/80';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 hover:bg-gray/80';
     }
   };
 
@@ -160,7 +161,7 @@ export function MessagesTable({
                   </div>
                 </td>
                 <td className="p-4">
-                  <Badge className={`flex items-center space-x-1 ${getStatusColor(message.status)}`}>
+                  <Badge className={`flex items-center space-x-1 w-fit ${getStatusColor(message.status)}`}>
                     {getStatusIcon(message.status)}
                     <span className="capitalize">{message.status}</span>
                   </Badge>
@@ -174,14 +175,14 @@ export function MessagesTable({
                   {message.message}
                 </td>
                 <td className="p-4">
-                  {message.assignee ? (
+                  {message.assignee?.id? (
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-6 h-6">
                         <AvatarFallback className="text-xs">
-                          {message.assignee.split(' ').map(n => n[0]).join('')}
+                          {message.assignee?.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{message.assignee}</span>
+                      <span className="text-sm">{message.assignee?.name}</span>
                     </div>
                   ) : (
                     <span className="text-sm text-gray-400">Unassigned</span>

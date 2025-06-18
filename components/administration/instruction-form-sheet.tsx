@@ -90,17 +90,17 @@ export function InstructionFormSheet({ isOpen, onClose, instruction, onSave }: I
               onValueChange={(value) =>
                 setFormData({ 
                   ...formData, 
-                  administration: value === '-1' 
+                  administration: value === '' 
                     ? undefined 
                     : administrations.find((admin) => String(admin.id) === value) 
                 })
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select administration (optional)" />
+                <SelectValue placeholder="*General instruction" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={'-1'} textValue={'*General instruction'}>
+                <SelectItem value={String(undefined)} textValue={'*General instruction'}>
                   General instruction
                 </SelectItem>
                 {administrations.map((admin) => (

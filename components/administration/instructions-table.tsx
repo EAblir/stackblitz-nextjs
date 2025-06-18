@@ -87,7 +87,7 @@ export function InstructionsTable({ searchQuery, instructions, onEdit, onDelete 
           <tbody>
             {filteredInstructions.map((instruction) => (
               <tr key={instruction.id} className="border-t border-gray-200 hover:bg-gray-50">
-                <td className="p-4 font-medium">{instruction.administration?.administrationName}</td>
+                <td className="p-4 font-medium">{instruction.administration?.administrationName ? instruction.administration?.administrationName : '*General instruction'}</td>
                 <td className="p-4 max-w-md">{instruction.content}</td>
                 <td className="p-4">
                   <Badge className={getStatusColor(instruction.status)}>

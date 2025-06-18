@@ -8,10 +8,11 @@ export async function GET() {
     const messages = await prisma.message.findMany({
       include: {
         administration: true,
-        user: true
+        user: true,
+        assignee: true
       },
       orderBy: {
-        created: 'desc'
+        created: 'desc' 
       }
     });
     return NextResponse.json(messages);
@@ -24,7 +25,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { administration, user, ...rest } = data;
+    const { administration, user, assignee, ...rest } = data;
     
     // Set administrationId if administration is provided
     if (administration && administration.id) {
@@ -41,7 +42,8 @@ export async function POST(req: NextRequest) {
       data: rest,
       include: {
         administration: true,
-        user: true
+        user: true,
+        assignee: true
       }
     });
     return NextResponse.json(message, { status: 201 });
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
-    const { id, administration, user, ...rest } = data;
+    const { id, administration, user, assignee, ...rest } = data;
     
     // Set administrationId if administration is provided
     if (administration && administration.id) {
@@ -66,7 +68,8 @@ export async function PUT(req: NextRequest) {
       data: rest,
       include: {
         administration: true,
-        user: true
+        user: true,
+        assignee: true
       }
     });
     return NextResponse.json(message);
