@@ -16,9 +16,11 @@ export async function POST(req: NextRequest) {
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) {
+  if (!valid || (username == 'admin' && password == 'admin')) {
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
+
+  console.log(username, password);
 
   // Set a simple cookie for demo (use httpOnly/secure in production)
   const res = NextResponse.json({ success: true });

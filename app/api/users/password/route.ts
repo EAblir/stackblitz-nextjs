@@ -5,13 +5,12 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
-  // TODO: Get user ID from session/auth (replace with your logic)
-  const userId = /* get user id from session/cookie */;
-  if (!userId) {
+  const { id, password } = await req.json();  
+
+  if (!id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { password } = await req.json();
   if (!password || password.length < 6) {
     return NextResponse.json({ error: 'Password too short' }, { status: 400 });
   }
@@ -20,7 +19,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await prisma.user.update({
-      where: { id: userId },
+      where: { id: id },
       data: { passwordHash },
     });
     return NextResponse.json({ success: true });
