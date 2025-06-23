@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState,useEffect } from 'react';
 import { Sidebar } from './sidebar';
 import { TopBar } from './topbar';
-import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface MainNavProps {
     children: React.ReactNode;
@@ -22,31 +20,21 @@ export function MainNav({
     selectedCompanyId, 
     onCompanyChange 
 }: MainNavProps) {
-    const { data: session, status } = useSession();
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        if (status === 'loading') return; // Still loading
+        
+    }, [router]);
 
-        if (!session) {
+    useEffect(() => {
+        const isLoggedIn = document.cookie.includes('auth=1');
+        if (!isLoggedIn) {
             router.replace('/login');
         }
-    }, [session, status, router]);
 
-    if (status === 'loading') {
-        return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-                    <p className="text-slate-600">Loading...</p>
-                </div>
-            </div>
-        );
-    }
+    }, [router]);
 
-    if (!session) {
-        return null; // Will redirect to login
-    }
 
     return (
         <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
@@ -55,11 +43,11 @@ export function MainNav({
                 isSidebarOpen={sidebarOpen}
                 selectedCompanyId={selectedCompanyId}
                 onCompanyChange={onCompanyChange}
-                session={session}
             />
             <main className="flex-1 flex overflow-hidden bg-gray-50">
                 <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
                 <div className="flex-1 overflow-y-auto">
+                    {loading && <div className="loading">Loading...</div>}
                     {children}
                 </div>
             </main>
