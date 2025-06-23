@@ -1,21 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (document.cookie.includes('auth=1')) {
-      router.replace('/dashboard');
-    }
+    const checkSession = async () => {
+      const session = await getSession();
+      if (session) {
+        router.replace('/dashboard');
+      }
+    };
+    checkSession();
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,108 +33,112 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setIsLoading(false);
-
-    if (res.ok) {
-      document.cookie = 'auth=1; path=/';
-      router.replace('/dashboard');
-    } else {
-      setError('Invalid credentials');
+      if (result?.error) {
+        setError('Invalid email or password');
+      } else if (result?.ok) {
+        router.replace('/dashboard');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, rgb(195, 207, 226) 0%, rgb(39, 68, 114) 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <div style={{
-        background: '#fff',
-        borderRadius: 16,
-        boxShadow: '0 4px 32px rgba(0,0,0,0.15)',
-        padding: 40,
-        width: 350,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}>
-        <Image
-            alt="Logo"
-            src="/images/logo-black.png"
-            height={36}
-            width={132}
-        />
-        <h2 style={{ margin: '24px 0 16px', fontWeight: 700, fontSize: 24, color: 'rgb(37, 54, 81)' }} className="text-center">
-          Sign in to Bookkeeping Portal
-        </h2>
-        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            required
-            autoFocus
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              marginBottom: 16,
-              border: '1px solid #ccd6dd',
-              borderRadius: 8,
-              fontSize: 16,
-              outline: 'none'
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              marginBottom: 16,
-              border: '1px solid #ccd6dd',
-              borderRadius: 8,
-              fontSize: 16,
-              outline: 'none'
-            }}
-          />
-          {error && (
-            <div style={{ color: '#e0245e', marginBottom: 12, textAlign: 'center' }}>
-              {error}
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="space-y-6 pb-8">
+            <div className="flex justify-center">
+              <Image
+                alt="Logo"
+                src="/images/logo-black.png"
+                height={40}
+                width={148}
+                className="h-10 w-auto"
+              />
             </div>
-          )}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              background: 'rgb(37, 54, 81)',
-              padding: '12px 0',
-              fontSize: 16,
-              cursor: 'pointer',
-              marginBottom: 8
-            }}
-          >
-            {isLoading ? 'Logging in...' : 'Log in'}
-          </Button>
-          {isLoading && <div style={{ textAlign: 'center', color: '#657786' }}>Loading...</div>}
-        </form>
-        {/* <div style={{ color: '#657786', fontSize: 14, marginTop: 8 }}>
-          Don’t have an account? <a href="#" style={{ color: 'rgb(37, 54, 81)', textDecoration: 'none' }}>Sign up</a>
-        </div> */}
+            <div className="text-center space-y-2">
+              <CardTitle className="text-2xl font-bold text-slate-800">
+                Welcome back
+              </CardTitle>
+              <CardDescription className="text-slate-600">
+                Sign in to your Bookkeeping Portal account
+              </CardDescription>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+                  Email address
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  autoFocus
+                  className="h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+
+              {error && (
+                <Alert variant="destructive" className="border-red-200 bg-red-50">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-11 bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign in'
+                )}
+              </Button>
+            </form>
+
+            <div className="text-center">
+              <p className="text-sm text-slate-600">
+                Demo credentials: john.doe@example.com / password123
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
